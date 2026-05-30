@@ -1,3 +1,3 @@
 #include <stdio.h>
-#include "util.h"
-int main() { util(); printf("Main done - v2\n"); return 0; }
+// Modified version
+int main() { printf("Hello World\n"); return 0; }

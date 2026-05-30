@@ -4,6 +4,7 @@ import { parseArgs } from 'node:util';
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { MakeWatcher } from '../src/watcher.js';
+import { getDefaultTarget } from '../src/runner.js';
 
 const VERSION = '1.0.0';
 
@@ -48,7 +49,12 @@ Examples:
 
   const cwd = values.directory ? resolve(values.directory) : process.cwd();
   const makefilePath = values.file;
-  const target = positionals[0] || '';
+  let target = positionals[0] || '';
+
+  // If no target specified, get make's default goal
+  if (!target) {
+    target = getDefaultTarget({ cwd, makefilePath });
+  }
 
   // Validate Makefile exists
   if (makefilePath) {

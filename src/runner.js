@@ -1,10 +1,33 @@
 import { spawnSync, spawn } from 'node:child_process';
 
-export function runParseDeps(target, { cwd, makefilePath }) {
-  const args = ['-pn'];
-  if (target) args.push(target);
+export function getDefaultTarget({ cwd, makefilePath }) {
+  const args = ['-p'];
   if (cwd) args.push('-C', cwd);
   if (makefilePath) args.push('-f', makefilePath);
+
+  const result = spawnSync('make', args, {
+    encoding: 'utf-8',
+    maxBuffer: 10 * 1024 * 1024,
+    stdio: ['pipe', 'pipe', 'pipe'],
+  });
+
+  // Parse output to find the LAST .DEFAULT_GOAL (make's final decision)
+  const lines = result.stdout.split('\n');
+  let defaultGoal = '';
+  for (const line of lines) {
+    const match = line.match(/^\.DEFAULT_GOAL\s*:=\s*(\S*)/);
+    if (match) {
+      defaultGoal = match[1]; // Keep updating to get the last one
+    }
+  }
+  return defaultGoal;
+}
+
+export function runParseDeps(target, { cwd, makefilePath }) {
+  const args = ['-pn'];
+  if (cwd) args.push('-C', cwd);
+  if (makefilePath) args.push('-f', makefilePath);
+  if (target) args.push(target);
 
   const result = spawnSync('make', args, {
     encoding: 'utf-8',
@@ -41,3 +64,4 @@ export function runMake(target, { cwd, makefilePath }) {
     });
   });
 }
+// test

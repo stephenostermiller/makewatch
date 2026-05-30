@@ -142,3 +142,17 @@ main.c:`;
   assert.ok(result.fileDeps.has('/test/main.c'));
   assert.ok(!result.fileDeps.has('/test/all'));
 });
+
+test('parser - empty target uses first target', () => {
+  const stdout = `# Variables
+
+# Files
+test: main.c
+main.c:
+clean: test`;
+
+  // Empty target - should work with the first target in the output
+  const result = parseMakePrintDatabase(stdout, 'test', '/test');
+  assert.ok(result.targetFound);
+  assert.ok(result.fileDeps.has('/test/main.c'));
+});

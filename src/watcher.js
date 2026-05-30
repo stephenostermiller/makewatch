@@ -112,9 +112,12 @@ export class MakeWatcher {
     await this.doReparse();
 
     this.buildInProgress = false;
+
+    // If file changes came in during the build, run immediately (no debounce)
     if (this.pendingRebuild) {
       this.pendingRebuild = false;
-      this.scheduleWork();
+      // Call directly instead of through scheduleWork() to avoid debounce delay
+      await this.doRebuildAndReparse();
     }
   }
 

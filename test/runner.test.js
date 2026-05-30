@@ -1,24 +1,30 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { runParseDeps, runMake } from '../src/runner.js';
+import { runParseDeps, runMake, getDefaultTarget } from '../src/runner.js';
 import { existsSync, writeFileSync, mkdirSync, rmSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-const testDir = '/tmp/makewatch-test';
+let testCounter = 0;
 
-function cleanup() {
+function getTestDir() {
+  return resolve('build', `test`);
+}
+
+function cleanup(testDir) {
   if (existsSync(testDir)) {
     rmSync(testDir, { recursive: true, force: true });
   }
 }
 
 function setup() {
-  cleanup();
+  const testDir = getTestDir();
+  cleanup(testDir);
   mkdirSync(testDir, { recursive: true });
+  return testDir;
 }
 
 test('runner - runParseDeps basic', () => {
-  setup();
+  const testDir = setup();
 
   const makefile = `
 app: main.o
@@ -31,11 +37,11 @@ main.c:
   assert.equal(result.exitCode, 0);
   assert.ok(result.stdout.includes('Makefile'));
 
-  cleanup();
+  cleanup(testDir);
 });
 
 test('runner - runParseDeps with nonexistent target', () => {
-  setup();
+  const testDir = setup();
 
   const makefile = `app: main.c
 main.c:
@@ -46,11 +52,11 @@ main.c:
   // make returns exit code 2 for "no rule"
   assert.notEqual(result.exitCode, 0);
 
-  cleanup();
+  cleanup(testDir);
 });
 
 test('runner - runParseDeps with custom makefile', () => {
-  setup();
+  const testDir = setup();
 
   const makefile = `target: dep
 dep:
@@ -63,11 +69,11 @@ dep:
   });
   assert.equal(result.exitCode, 0);
 
-  cleanup();
+  cleanup(testDir);
 });
 
 test('runner - runMake succeeds', async () => {
-  setup();
+  const testDir = setup();
 
   const makefile = `target:
 	echo "built"
@@ -77,11 +83,11 @@ test('runner - runMake succeeds', async () => {
   const exitCode = await runMake('target', { cwd: testDir });
   assert.equal(exitCode, 0);
 
-  cleanup();
+  cleanup(testDir);
 });
 
 test('runner - runMake fails on missing target', async () => {
-  setup();
+  const testDir = setup();
 
   const makefile = `target:
 	echo "built"
@@ -91,5 +97,59 @@ test('runner - runMake fails on missing target', async () => {
   const exitCode = await runMake('nonexistent', { cwd: testDir });
   assert.notEqual(exitCode, 0);
 
-  cleanup();
+  cleanup(testDir);
+});
+
+test('runner - getDefaultTarget with first target as default', () => {
+  const testDir = setup();
+
+  const makefile = `build:
+	echo "Building"
+
+test:
+	echo "Testing"
+`;
+  writeFileSync(resolve(testDir, 'Makefile'), makefile);
+
+  const target = getDefaultTarget({ cwd: testDir });
+  assert.equal(target, 'build');
+
+  cleanup(testDir);
+});
+
+test('runner - getDefaultTarget with explicit .DEFAULT_GOAL', () => {
+  const testDir = setup();
+
+  const makefile = `test:
+	echo "Testing"
+
+.DEFAULT_GOAL := build
+
+build:
+	echo "Building"
+`;
+  writeFileSync(resolve(testDir, 'Makefile'), makefile);
+
+  const target = getDefaultTarget({ cwd: testDir });
+  assert.equal(target, 'build');
+
+  cleanup(testDir);
+});
+
+test('runner - getDefaultTarget with .PHONY target as first', () => {
+  const testDir = setup();
+
+  const makefile = `.PHONY: test
+test:
+	echo "Testing"
+
+build:
+	echo "Building"
+`;
+  writeFileSync(resolve(testDir, 'Makefile'), makefile);
+
+  const target = getDefaultTarget({ cwd: testDir });
+  assert.equal(target, 'test');
+
+  cleanup(testDir);
 });
