@@ -34,20 +34,29 @@ if [[ -n "$(git ls-files --others --exclude-standard)" ]]; then
   exit 1
 fi
 
-# Get current version from VERSION file
+# Get current version from VERSION file (single source of truth)
 CURRENT_VERSION=$(cat "$REPO_ROOT/VERSION")
 
 echo "Current version: $CURRENT_VERSION"
 echo "Bumping $BUMP_TYPE..."
 
-# Update version using npm (handles semver bumping)
-npm version "$BUMP_TYPE" --no-git-tag-version
+# Parse version: X.Y.Z
+IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
 
-# Read the new version that npm wrote to package.json
-NEW_VERSION=$(jq -r '.version' "$REPO_ROOT/package.json")
+# Bump appropriate part
+case "$BUMP_TYPE" in
+  major) MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0 ;;
+  minor) MINOR=$((MINOR + 1)); PATCH=0 ;;
+  patch) PATCH=$((PATCH + 1)) ;;
+esac
 
-# Update VERSION file to match
+NEW_VERSION="$MAJOR.$MINOR.$PATCH"
+
+# Update VERSION file
 echo "$NEW_VERSION" > "$REPO_ROOT/VERSION"
+
+# Let npm update package.json and package-lock.json with the computed version
+npm version "$NEW_VERSION" --no-git-tag-version
 
 # Check if tag already exists
 TAG_NAME="VERSION_${NEW_VERSION}"
