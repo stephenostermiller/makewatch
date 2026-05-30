@@ -15,6 +15,7 @@ async function main() {
       file: { type: 'string', short: 'f' },
       debounce: { type: 'string', short: 'd', default: '300' },
       verbose: { type: 'boolean', short: 'v', default: false },
+      tee: { type: 'string' },
       help: { type: 'boolean', short: 'h', default: false },
       version: { type: 'boolean', default: false },
     },
@@ -31,6 +32,7 @@ Options:
   -f <file>        Specify Makefile path
   -d <ms>          Debounce delay in milliseconds (default: 300)
   -v               Verbose output
+  --tee <file>     Save latest output to given file
   -h               Show this help message
   --version        Show version
 
@@ -38,6 +40,7 @@ Examples:
   makewatch all
   makewatch -C src build
   makewatch -f custom.mk clean
+  makewatch --tee build.log all
 `);
     process.exit(0);
   }
@@ -84,6 +87,7 @@ Examples:
       makefilePath,
       debounce: values.debounce,
       verbose: values.verbose,
+      tee: values.tee,
     }).initialize();
 
     console.log(

@@ -11,13 +11,9 @@ build/.install:
 .PHONY: install
 install: build/.install
 
-.PHONY: test-watch
-test-watch:
-	node bin/makewatch.js build/.test
-
-.PHONY: run
-run:
-	node bin/makewatch.js
+.PHONY: watch
+watch:
+	node bin/makewatch.js --tee build/test-results.txt build/.test
 
 .PHONY: test
 test: build/.test

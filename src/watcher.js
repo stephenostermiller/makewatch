@@ -106,7 +106,7 @@ export class MakeWatcher {
 
     this.buildInProgress = true;
 
-    const exitCode = await runMake(this.target, { ...this.opts, verbose: this.verbose });
+    const exitCode = await runMake(this.target, { ...this.opts, verbose: this.verbose, tee: this.opts.tee });
     if (exitCode !== 0) {
       console.error(`[makewatch] make failed with exit code ${exitCode}`);
     }
