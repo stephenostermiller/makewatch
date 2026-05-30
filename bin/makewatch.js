@@ -14,18 +14,34 @@ const VERSION = readFileSync(join(__dirname, '..', 'VERSION'), 'utf8').trim();
 function getDisplayVersion() {
   const pkgRoot = join(__dirname, '..');
   try {
-    execSync('git describe --tags --exact-match --match "VERSION_*" HEAD', {
-      stdio: 'pipe',
-      cwd: pkgRoot,
-    });
-    return VERSION;
-  } catch {
+    // Check if we're in a git repo (fails gracefully if git is not installed)
+    execSync('git rev-parse --git-dir', { stdio: 'pipe', cwd: pkgRoot });
+
+    // We're in a git repo; check if working tree is clean
     try {
-      execSync('git rev-parse --git-dir', { stdio: 'pipe', cwd: pkgRoot });
-      return VERSION + '+';
+      execSync('git diff --quiet && git diff --cached --quiet', {
+        stdio: 'pipe',
+        cwd: pkgRoot,
+        shell: true,
+      });
     } catch {
-      return VERSION;
+      // Working tree has uncommitted/unstaged changes
+      return VERSION + '+';
     }
+
+    // Working tree is clean; check if we're exactly on a release tag
+    try {
+      execSync('git describe --tags --exact-match --match "VERSION_*" HEAD', {
+        stdio: 'pipe',
+        cwd: pkgRoot,
+      });
+      return VERSION; // Exactly on a release tag
+    } catch {
+      return VERSION + '+'; // Not on a tag (but working tree is clean)
+    }
+  } catch {
+    // Not in a git repo (or git not installed) — zip distribution or npm global install
+    return VERSION;
   }
 }
 
