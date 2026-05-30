@@ -1,0 +1,21 @@
+{
+  "name": "makewatch",
+  "version": "1.0.0",
+  "description": "Watch Makefile dependencies and re-run make on changes",
+  "type": "module",
+  "bin": {
+    "makewatch": "./bin/makewatch.js"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "test:watch": "node --test --watch test/*.test.js"
+  },
+  "dependencies": {
+    "chokidar": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "keywords": ["make", "makefile", "watch", "build", "dependencies"],
+  "license": "MIT"
+}

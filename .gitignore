@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Demo/test outputs
+demo/app
+demo/src/*.o
+demo/src/*.out
+demo/bin/
+
+# Build artifacts
+*.o
+*.a
+*.so
+*.dylib
+*.exe
+dist/
+build/
+
+# IDE & editor files
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
