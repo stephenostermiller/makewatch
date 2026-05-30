@@ -7,8 +7,8 @@
     "makewatch": "./bin/makewatch.js"
   },
   "scripts": {
-    "test": "node --test test/*.test.js",
-    "test:watch": "node --test --watch test/*.test.js"
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "chokidar": "^5.0.0"
@@ -16,6 +16,15 @@
   "engines": {
     "node": ">=20.19.0"
   },
-  "keywords": ["make", "makefile", "watch", "build", "dependencies"],
-  "license": "MIT"
+  "keywords": [
+    "make",
+    "makefile",
+    "watch",
+    "build",
+    "dependencies"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "vitest": "^4.1.7"
+  }
 }

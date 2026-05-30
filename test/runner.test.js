@@ -1,4 +1,4 @@
-import { test } from 'node:test';
+import { test, expect } from 'vitest';
 import assert from 'node:assert/strict';
 import { runParseDeps, runMake, getDefaultTarget } from '../src/runner.js';
 import { existsSync, writeFileSync, mkdirSync, rmSync } from 'node:fs';
@@ -7,7 +7,7 @@ import { resolve } from 'node:path';
 let testCounter = 0;
 
 function getTestDir() {
-  return resolve('build', `test`);
+  return resolve('build', `test-${testCounter++}`);
 }
 
 function cleanup(testDir) {
@@ -76,11 +76,11 @@ test('runner - runMake succeeds', async () => {
   const testDir = setup();
 
   const makefile = `target:
-	echo "built"
+	@echo "built"
 `;
   writeFileSync(resolve(testDir, 'Makefile'), makefile);
 
-  const exitCode = await runMake('target', { cwd: testDir });
+  const exitCode = await runMake('target', { cwd: testDir, quiet: true });
   assert.equal(exitCode, 0);
 
   cleanup(testDir);
@@ -90,11 +90,11 @@ test('runner - runMake fails on missing target', async () => {
   const testDir = setup();
 
   const makefile = `target:
-	echo "built"
+	@echo "built"
 `;
   writeFileSync(resolve(testDir, 'Makefile'), makefile);
 
-  const exitCode = await runMake('nonexistent', { cwd: testDir });
+  const exitCode = await runMake('nonexistent', { cwd: testDir, quiet: true });
   assert.notEqual(exitCode, 0);
 
   cleanup(testDir);
@@ -104,10 +104,10 @@ test('runner - getDefaultTarget with first target as default', () => {
   const testDir = setup();
 
   const makefile = `build:
-	echo "Building"
+	@echo "Building"
 
 test:
-	echo "Testing"
+	@echo "Testing"
 `;
   writeFileSync(resolve(testDir, 'Makefile'), makefile);
 
@@ -126,7 +126,7 @@ test('runner - getDefaultTarget with explicit .DEFAULT_GOAL', () => {
 .DEFAULT_GOAL := build
 
 build:
-	echo "Building"
+	@echo "Building"
 `;
   writeFileSync(resolve(testDir, 'Makefile'), makefile);
 
@@ -141,10 +141,10 @@ test('runner - getDefaultTarget with .PHONY target as first', () => {
 
   const makefile = `.PHONY: test
 test:
-	echo "Testing"
+	@echo "Testing"
 
 build:
-	echo "Building"
+	@echo "Building"
 `;
   writeFileSync(resolve(testDir, 'Makefile'), makefile);
 

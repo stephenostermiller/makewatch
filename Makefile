@@ -13,7 +13,7 @@ install: build/.install
 
 .PHONY: test-watch
 test-watch:
-	node bin/makewatch.js test
+	node bin/makewatch.js build/.test
 
 .PHONY: run
 run:

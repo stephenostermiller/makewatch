@@ -111,8 +111,8 @@ export function parseMakePrintDatabase(stdout, requestedTarget, cwd) {
     const isPhony = phonySet.has(current);
     const isSpecial = SPECIAL_TARGETS.has(current);
 
-    // Add to watch list if it's a real file (not phony, not special)
-    if (!isPhony && !isSpecial && !current.includes('%')) {
+    // Add to watch list if it's a real file (not phony, not special, not the target itself)
+    if (current !== requestedTarget && !isPhony && !isSpecial && !current.includes('%')) {
       fileDeps.add(resolve(cwd, current));
     }
 

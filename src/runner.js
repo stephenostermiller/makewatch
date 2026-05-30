@@ -24,7 +24,7 @@ export function getDefaultTarget({ cwd, makefilePath }) {
 }
 
 export function runParseDeps(target, { cwd, makefilePath }) {
-  const args = ['-pn'];
+  const args = ['-pn', '--silent'];
   if (cwd) args.push('-C', cwd);
   if (makefilePath) args.push('-f', makefilePath);
   if (target) args.push(target);
@@ -42,15 +42,17 @@ export function runParseDeps(target, { cwd, makefilePath }) {
   };
 }
 
-export function runMake(target, { cwd, makefilePath }) {
+export function runMake(target, { cwd, makefilePath, verbose, quiet }) {
   return new Promise((resolve) => {
     const args = [];
+    if (!verbose) args.push('--no-print-directory');
     if (target) args.push(target);
     if (cwd) args.push('-C', cwd);
     if (makefilePath) args.push('-f', makefilePath);
 
+    const stdio = quiet ? ['inherit', 'pipe', 'pipe'] : 'inherit';
     const proc = spawn('make', args, {
-      stdio: 'inherit',
+      stdio,
       cwd,
     });
 
@@ -64,4 +66,3 @@ export function runMake(target, { cwd, makefilePath }) {
     });
   });
 }
-// test

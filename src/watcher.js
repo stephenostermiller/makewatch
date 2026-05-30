@@ -35,6 +35,7 @@ export class MakeWatcher {
       persistent: true,
       ignoreInitial: true,
       depth: 0,
+      ignored: ['**/build/**', '**/node_modules/**', '**/.git/**'],
       awaitWriteFinish: {
         stabilityThreshold: 100,
         pollInterval: 100,
@@ -45,6 +46,7 @@ export class MakeWatcher {
       persistent: true,
       ignoreInitial: true,
       depth: 0,
+      ignored: ['**/build/**', '**/node_modules/**', '**/.git/**'],
       awaitWriteFinish: {
         stabilityThreshold: 100,
         pollInterval: 100,
@@ -104,7 +106,7 @@ export class MakeWatcher {
 
     this.buildInProgress = true;
 
-    const exitCode = await runMake(this.target, this.opts);
+    const exitCode = await runMake(this.target, { ...this.opts, verbose: this.verbose });
     if (exitCode !== 0) {
       console.error(`[makewatch] make failed with exit code ${exitCode}`);
     }
