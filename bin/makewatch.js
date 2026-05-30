@@ -1,12 +1,35 @@
 #!/usr/bin/env node
 
 import { parseArgs } from 'node:util';
-import { existsSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { existsSync, readFileSync } from 'node:fs';
+import { resolve, dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { execSync } from 'node:child_process';
 import { MakeWatcher } from '../src/watcher.js';
 import { getDefaultTarget } from '../src/runner.js';
 
-const VERSION = '1.0.0';
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const VERSION = readFileSync(join(__dirname, '..', 'VERSION'), 'utf8').trim();
+
+function getDisplayVersion() {
+  const pkgRoot = join(__dirname, '..');
+  try {
+    execSync('git describe --tags --exact-match --match "VERSION_*" HEAD', {
+      stdio: 'pipe',
+      cwd: pkgRoot,
+    });
+    return VERSION;
+  } catch {
+    try {
+      execSync('git rev-parse --git-dir', { stdio: 'pipe', cwd: pkgRoot });
+      return VERSION + '+';
+    } catch {
+      return VERSION;
+    }
+  }
+}
+
+const DISPLAY_VERSION = getDisplayVersion();
 
 async function main() {
   const { values, positionals } = parseArgs({
@@ -46,7 +69,7 @@ Examples:
   }
 
   if (values.version) {
-    console.log(`makewatch ${VERSION}`);
+    console.log(`makewatch ${DISPLAY_VERSION}`);
     process.exit(0);
   }
 
