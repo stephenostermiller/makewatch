@@ -13,10 +13,32 @@ A Node.js CLI utility that watches a Makefile's dependency graph and automatical
 
 ## Installation
 
+### Prerequisites
+
+- **Node.js** >= 18.20.0
+- **make** — Standard Unix build tool (usually pre-installed on Linux/macOS)
+
+### From release download
+
+Download the latest release, extract it, and run the install script:
+
 ```bash
-npm install
-# Or globally (requires sudo):
-sudo npm install -g .
+tar xzf makewatch-*.tar.gz
+cd makewatch-*
+./scripts/install.sh
+makewatch [options] [target]
+```
+
+The `scripts/install.sh` script:
+- Copies the package to `/opt/makewatch` (or `~/.local/opt/makewatch` if `/opt` isn't writable)
+- Installs dependencies
+- Creates a `makewatch` command in `/usr/local/bin/` (or `~/.local/bin` if `/usr/local/bin` isn't writable)
+
+The script automatically detects write permissions and uses user-local directories (`~/.local/`) if system directories aren't accessible.
+
+You can override the defaults:
+```bash
+INSTALL_PREFIX=~/.local/opt/makewatch BIN_PREFIX=~/.local/bin ./scripts/install.sh
 ```
 
 ## Usage
@@ -47,7 +69,7 @@ makewatch -C src build
 
 Use a custom Makefile:
 ```bash
-makewatch -f custom.mk clean
+makewatch -f custom.mk
 ```
 
 Verbose mode to see each file change:
@@ -67,39 +89,6 @@ makewatch -d 100 all
 3. **Watch files** — Use chokidar (inotify-based) to monitor those files for changes
 4. **Rebuild** — When any file changes, debounce for ~300ms then run `make <target>`
 5. **Re-parse** — After each rebuild, re-parse dependencies to pick up newly-created files that match wildcard patterns
-
-## Architecture
-
-```
-bin/makewatch.js      # CLI entry point
-src/
-  parser.js           # make -pn output parser
-  runner.js           # spawn make processes
-  watcher.js          # chokidar event handling
-  debounce.js         # simple debounce utility
-test/
-  parser.test.js      # parser unit tests
-  runner.test.js      # runner integration tests
-  debounce.test.js    # debounce tests
-```
-
-## Testing
-
-```bash
-npm test                # Run all tests
-npm run test:watch      # Run tests in watch mode
-```
-
-The test suite includes:
-- Parser tests for dependency graph extraction
-- Runner tests for make process invocation
-- Debounce tests for timing correctness
-
-## Limitations
-
-- Only tested on Linux (uses inotify via chokidar)
-- Large projects with very deep dependency graphs may take a moment to parse
-- Circular dependencies are handled gracefully (BFS visited set) but should be avoided
 
 ## License
 

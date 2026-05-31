@@ -13,8 +13,11 @@
   "dependencies": {
     "chokidar": "^5.0.0"
   },
+  "devDependencies": {
+    "vitest": "^4.1.7"
+  },
   "engines": {
-    "node": ">=20.19.0"
+    "node": ">=18.20.0"
   },
   "keywords": [
     "make",
@@ -23,8 +26,5 @@
     "build",
     "dependencies"
   ],
-  "license": "MIT",
-  "devDependencies": {
-    "vitest": "^4.1.7"
-  }
+  "license": "MIT"
 }

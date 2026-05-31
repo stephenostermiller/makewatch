@@ -22,3 +22,15 @@ test: build/.test
 clean:
 	rm -rf build/
 	@echo "✓ Cleaned"
+
+.PHONY: patch
+patch:
+	./scripts/bump-version.sh patch
+
+.PHONY: minor
+minor:
+	./scripts/bump-version.sh minor
+
+.PHONY: major
+major:
+	./scripts/bump-version.sh major
