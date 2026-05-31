@@ -1,6 +1,6 @@
 {
   "name": "makewatch",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Watch Makefile dependencies and re-run make on changes",
   "type": "module",
   "bin": {
